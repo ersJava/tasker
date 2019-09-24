@@ -1,0 +1,135 @@
+openapi: 3.0.0
+info:
+  title: Tasker Service
+  description: A simple service that allows CRUD operations for a simple task-tracking web service and incorporates an ad server that serves up an advertisement with every task.
+  version: 0.0.1
+servers: 
+  - url: 'http://localhost:9999'
+    description: Config server
+  - url: 'http://localhost:8761'
+    description: Eureka server
+  - url: 'http://localhost:2212'
+    description: Tasker service
+  - url: 'http://localhost:6107'
+    description: Adserver service
+
+# Basic CRUD Task
+paths:
+  /tasks:
+    post:
+      summary: Creates a new Task.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '201':
+          description: A Task object with an advertisement.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid request syntax.
+        '422':
+          description: Incomplete Task information. Some required fields missing.
+    get:
+      summary: Retrieves all Task entries.
+      responses:
+        '200':
+          description: A list of all Task entries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tasks'
+  /tasks/{id}:
+    get:
+      summary: Retrieves the entry for the Task by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the Task you would like to retrieve.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Task object matching given ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Task with given ID not found.
+          
+    delete:
+      summary: Deletes the entry for the Task by ID.
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: ID of the Task you would like to delete.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Task successfully deleted.
+        '404':
+          description: Task with given ID not found.
+    put:
+      summary: Updates the entry for the Task by ID.
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: ID of the Task you would like to update.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '200':
+          description: Task successfully updated.
+        '404':
+          description: Task with given ID not found.
+        '422':
+          description: Task ID on path must match the ID in the Task object.
+components:
+  schemas:
+    Task:
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+        createDate:
+          type: number
+        dueDate:
+          type: number
+        category:
+          type: string
+        advertisement:
+          type: string
+      required: 
+        - description
+        - createDate
+        - dueDate
+    Tasks:
+      type: array
+      items:
+         $ref: '#/components/schemas/Task'      
+  
